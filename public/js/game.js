@@ -823,6 +823,35 @@ class TicTacToeGame {
     updatePlayerNames(player1, player2) {
         document.getElementById('playerXName').textContent = player1;
         document.getElementById('playerOName').textContent = player2;
+        
+        // Update avatars
+        const playerXAvatar = document.querySelector('.player-x .player-avatar');
+        const playerOAvatar = document.querySelector('.player-o .player-avatar');
+        
+        if (this.gameMode === 'ai') {
+            // Player X is you
+            if (playerXAvatar && window.avatarManager) {
+                playerXAvatar.textContent = window.avatarManager.getAvatarEmoji();
+            }
+            // Player O is AI
+            if (playerOAvatar) {
+                playerOAvatar.textContent = '🤖';
+            }
+        } else if (this.gameMode === 'online') {
+            // Show your avatar
+            if (mySymbol === 'X' && playerXAvatar && window.avatarManager) {
+                playerXAvatar.textContent = window.avatarManager.getAvatarEmoji();
+            } else if (mySymbol === 'O' && playerOAvatar && window.avatarManager) {
+                playerOAvatar.textContent = window.avatarManager.getAvatarEmoji();
+            }
+            
+            // Show opponent avatar (default for now)
+            if (mySymbol === 'X' && playerOAvatar) {
+                playerOAvatar.textContent = '👤';
+            } else if (mySymbol === 'O' && playerXAvatar) {
+                playerXAvatar.textContent = '👤';
+            }
+        }
     }
 
     updateTurnIndicator() {

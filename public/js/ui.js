@@ -127,9 +127,25 @@ class UIManager {
             this.toggleSound();
         });
 
-        // Profile button
+        // Profile button - opens avatar selector
         document.getElementById('profileBtn').addEventListener('click', () => {
-            this.showProfile();
+            this.openAvatarSelector();
+        });
+
+        // Long press for profile stats
+        let pressTimer;
+        document.getElementById('profileBtn').addEventListener('mousedown', () => {
+            pressTimer = setTimeout(() => {
+                this.showProfile();
+            }, 1000);
+        });
+
+        document.getElementById('profileBtn').addEventListener('mouseup', () => {
+            clearTimeout(pressTimer);
+        });
+
+        document.getElementById('profileBtn').addEventListener('mouseleave', () => {
+            clearTimeout(pressTimer);
         });
 
         // Close modals on backdrop click
@@ -190,6 +206,10 @@ class UIManager {
         document.getElementById('roomModal').classList.add('hidden');
         document.getElementById('joinModal').classList.add('hidden');
         document.getElementById('resultModal').classList.add('hidden');
+        const avatarModal = document.getElementById('avatarModal');
+        if (avatarModal) {
+            avatarModal.classList.add('hidden');
+        }
     }
 
     createRoom() {
@@ -220,7 +240,7 @@ class UIManager {
     copyRoomCode() {
         const code = document.getElementById('roomCode').textContent;
         navigator.clipboard.writeText(code).then(() => {
-            this.showNotification('Room code copied to clipboard!');
+            this.showNotification('✓ Room code copied to clipboard!');
             this.playSound('notification');
         }).catch(err => {
             console.error('Failed to copy:', err);
@@ -447,8 +467,20 @@ class UIManager {
             wins: userData.wins || 0,
             losses: userData.losses || 0,
             draws: userData.draws || 0,
-            totalGames: userData.totalGames || 0
+            totalGames: userData.totalGames || 0,
+            gamesPlayedToday: userData.gamesPlayedToday || 0,
+            winStreak: userData.winStreak || 0,
+            bestWinStreak: userData.bestWinStreak || 0,
+            lastPlayedDate: userData.lastPlayedDate || null
         };
+
+        // Reset daily stats if new day
+        const today = new Date().toDateString();
+        if (this.userData.lastPlayedDate !== today) {
+            this.userData.gamesPlayedToday = 0;
+            this.userData.lastPlayedDate = today;
+            this.saveUserData();
+        }
 
         this.updateStats();
     }
@@ -476,9 +508,20 @@ class UIManager {
 
     recordGameResult(result) {
         this.userData.totalGames++;
-        if (result === 'win') this.userData.wins++;
-        else if (result === 'lose') this.userData.losses++;
-        else if (result === 'draw') this.userData.draws++;
+        this.userData.gamesPlayedToday++;
+        
+        if (result === 'win') {
+            this.userData.wins++;
+            this.userData.winStreak++;
+            if (this.userData.winStreak > this.userData.bestWinStreak) {
+                this.userData.bestWinStreak = this.userData.winStreak;
+            }
+        } else if (result === 'lose') {
+            this.userData.losses++;
+            this.userData.winStreak = 0;
+        } else if (result === 'draw') {
+            this.userData.draws++;
+        }
         
         this.updateStats();
         this.saveUserData();
@@ -574,15 +617,77 @@ class UIManager {
         }, 2000);
     }
 
-    // ===== PROFILE =====
+    // ===== AVATAR =====
+
+    openAvatarSelector() {
+        if (window.avatarManager) {
+            window.avatarManager.openAvatarModal();
+        }
+    }
+
+    // ===== PROFILE (ENHANCED) =====
 
     showProfile() {
-        alert('Profile feature coming soon!\n\nYour Stats:\n' +
-              `Total Games: ${this.userData.totalGames}\n` +
-              `Wins: ${this.userData.wins}\n` +
-              `Losses: ${this.userData.losses}\n` +
-              `Draws: ${this.userData.draws}\n` +
-              `Points: ${this.userData.points}`);
+        const avatar = window.avatarManager ? window.avatarManager.getAvatar() : { emoji: '😊', name: 'Happy' };
+        const username = window.usernameManager ? window.usernameManager.getUsername() : 'Player';
+        
+        const winRate = this.userData.totalGames > 0 
+            ? Math.round((this.userData.wins / this.userData.totalGames) * 100)
+            : 0;
+        
+        const lossRate = this.userData.totalGames > 0 
+            ? Math.round((this.userData.losses / this.userData.totalGames) * 100)
+            : 0;
+        
+        const drawRate = this.userData.totalGames > 0 
+            ? Math.round((this.userData.draws / this.userData.totalGames) * 100)
+            : 0;
+
+        const profileInfo = `
+╔═══════════════════════════════════════╗
+║           YOUR PROFILE                ║
+╚═══════════════════════════════════════╝
+
+${avatar.emoji}  ${username}
+Avatar: ${avatar.name}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 GAME STATISTICS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Total Games:        ${this.userData.totalGames}
+Games Today:        ${this.userData.gamesPlayedToday}
+
+Wins:              ${this.userData.wins} (${winRate}%)
+Losses:            ${this.userData.losses} (${lossRate}%)
+Draws:             ${this.userData.draws} (${drawRate}%)
+
+Current Streak:    ${this.userData.winStreak} 🔥
+Best Streak:       ${this.userData.bestWinStreak} 🏆
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💰 POINTS & RANKING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Total Points:      ${this.userData.points} pts
+
+${this.getRankBadge(this.userData.points)}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 Click your avatar to change it!
+📊 Hold click on avatar for this profile view
+        `;
+        
+        alert(profileInfo);
+    }
+
+    getRankBadge(points) {
+        if (points >= 1000) return 'Rank: 💎 Diamond Master';
+        if (points >= 500) return 'Rank: 🥇 Gold Champion';
+        if (points >= 250) return 'Rank: 🥈 Silver Expert';
+        if (points >= 100) return 'Rank: 🥉 Bronze Player';
+        return 'Rank: 🌟 Beginner';
     }
 }
 
