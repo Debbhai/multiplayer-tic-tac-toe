@@ -4,7 +4,7 @@
  */
 
 // Socket.IO Connection
-const socket = io(window.location.origin); // Change to your server URL in production
+const socket = io(); // Auto-detect URL (works on localhost AND production)
 
 let currentRoomCode = null;
 let myPlayerId = null;
