@@ -4,7 +4,7 @@
  */
 
 // Socket.IO Connection
-const socket = io(); // Auto-detect URL (works on localhost AND production)
+const socket = io();
 
 let currentRoomCode = null;
 let myPlayerId = null;
@@ -42,13 +42,23 @@ socket.on('connect_error', (error) => {
 socket.on('playerJoined', (data) => {
     console.log('Player joined:', data);
     if (window.ui) {
-        window.ui.addChatMessage('system', `${data.username} joined the room`);
+        window.ui.addChatMessage('system', `${data.username} joined the room. Starting game...`);
+        window.ui.closeAllModals();
     }
 });
 
 // Game Start
 socket.on('gameStart', (data) => {
     console.log('Game starting:', data);
+    
+    // Close all modals and show game screen
+    if (window.ui) {
+        window.ui.closeAllModals();
+        window.ui.showScreen('gameScreen');
+        window.ui.addChatMessage('system', 'Game starting...');
+    }
+    
+    // Initialize game
     if (window.game) {
         window.game.handleGameStart(data);
     }
@@ -157,6 +167,7 @@ class TicTacToeGame {
         this.moveCount = 0;
         this.moveTimes = [];
         this.isMyTurn = false;
+        this.winningPattern = null;
         
         this.init();
     }
@@ -259,11 +270,20 @@ class TicTacToeGame {
             window.ui.playSound('win');
             
             // Highlight winning cells
-            this.highlightWinningPattern(data.winningPattern);
+            if (data.winningPattern) {
+                this.winningPattern = data.winningPattern;
+                this.highlightWinningCells(data.winningPattern);
+            }
         } else {
             result = 'lose';
             points = 0;
             window.ui.playSound('lose');
+            
+            // Highlight winning cells even when losing
+            if (data.winningPattern) {
+                this.winningPattern = data.winningPattern;
+                this.highlightWinningCells(data.winningPattern);
+            }
         }
 
         // Record result
@@ -292,15 +312,18 @@ class TicTacToeGame {
         }
     }
 
-    highlightWinningPattern(pattern) {
-        if (!pattern) return;
-        
-        pattern.forEach(index => {
-            const cell = document.querySelector(`.cell[data-index="${index}"]`);
-            cell.classList.add('winner');
-        });
-        
-        this.drawWinningLine(pattern);
+    highlightWinningCells(pattern) {
+        // Add a small delay to ensure cells are rendered before drawing line
+        setTimeout(() => {
+            pattern.forEach(index => {
+                const cell = document.querySelector(`.cell[data-index="${index}"]`);
+                if (cell) {
+                    cell.classList.add('winner');
+                }
+            });
+
+            this.drawWinningLine(pattern);
+        }, 100);
     }
 
     // ===== GAME START METHODS =====
@@ -643,7 +666,10 @@ class TicTacToeGame {
         for (const pattern of winPatterns) {
             const [a, b, c] = pattern;
             if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-                if (this.gameActive) {
+                // Only highlight if game is still active AND we're checking the current board
+                if (this.gameActive && board === this.board) {
+                    // Store the winning pattern for later use
+                    this.winningPattern = pattern;
                     this.highlightWinningCells(pattern);
                 }
                 return board[a];
@@ -653,36 +679,42 @@ class TicTacToeGame {
         return null;
     }
 
-    highlightWinningCells(pattern) {
-        pattern.forEach(index => {
-            const cell = document.querySelector(`.cell[data-index="${index}"]`);
-            cell.classList.add('winner');
-        });
-
-        this.drawWinningLine(pattern);
-    }
-
     drawWinningLine(pattern) {
         const line = document.getElementById('winningLine');
+        if (!line) return;
+        
         const svg = line;
         const lineElement = svg.querySelector('line');
+        if (!lineElement) return;
         
         const cells = document.querySelectorAll('.cell');
-        const firstCell = cells[pattern[0]].getBoundingClientRect();
-        const lastCell = cells[pattern[2]].getBoundingClientRect();
-        const board = document.querySelector('.board-wrapper').getBoundingClientRect();
+        if (!cells || cells.length < 9) return;
+        
+        const firstCell = cells[pattern[0]];
+        const lastCell = cells[pattern[2]];
+        if (!firstCell || !lastCell) return;
+        
+        const boardWrapper = document.querySelector('.board-wrapper');
+        if (!boardWrapper) return;
+        
+        const firstRect = firstCell.getBoundingClientRect();
+        const lastRect = lastCell.getBoundingClientRect();
+        const boardRect = boardWrapper.getBoundingClientRect();
 
-        const x1 = firstCell.left + firstCell.width / 2 - board.left;
-        const y1 = firstCell.top + firstCell.height / 2 - board.top;
-        const x2 = lastCell.left + lastCell.width / 2 - board.left;
-        const y2 = lastCell.top + lastCell.height / 2 - board.top;
+        const x1 = firstRect.left + firstRect.width / 2 - boardRect.left;
+        const y1 = firstRect.top + firstRect.height / 2 - boardRect.top;
+        const x2 = lastRect.left + lastRect.width / 2 - boardRect.left;
+        const y2 = lastRect.top + lastRect.height / 2 - boardRect.top;
 
         lineElement.setAttribute('x1', x1);
         lineElement.setAttribute('y1', y1);
         lineElement.setAttribute('x2', x2);
         lineElement.setAttribute('y2', y2);
 
-        svg.classList.add('show');
+        // Only show the line if game is not active (game has ended)
+        if (!this.gameActive) {
+            svg.classList.add('show');
+        }
     }
 
     // ===== TIMER =====
@@ -809,10 +841,20 @@ class TicTacToeGame {
             result = 'win';
             points = this.calculatePoints();
             window.ui.playSound('win');
+            
+            // Draw winning line ONLY after game ends
+            if (this.winningPattern) {
+                this.drawWinningLine(this.winningPattern);
+            }
         } else {
             result = 'lose';
             points = 0;
             window.ui.playSound('lose');
+            
+            // Draw winning line ONLY after game ends
+            if (this.winningPattern) {
+                this.drawWinningLine(this.winningPattern);
+            }
         }
 
         window.ui.recordGameResult(result);
@@ -863,6 +905,7 @@ class TicTacToeGame {
         this.moveCount = 0;
         this.moveTimes = [];
         this.isMyTurn = false;
+        this.winningPattern = null;
         this.stopTimer();
 
         document.querySelectorAll('.cell').forEach(cell => {
@@ -870,7 +913,18 @@ class TicTacToeGame {
             cell.classList.remove('filled', 'x', 'o', 'winner');
         });
 
-        document.getElementById('winningLine').classList.remove('show');
+        // Hide and reset the winning line
+        const winningLine = document.getElementById('winningLine');
+        if (winningLine) {
+            winningLine.classList.remove('show');
+            const lineElement = winningLine.querySelector('line');
+            if (lineElement) {
+                lineElement.setAttribute('x1', 0);
+                lineElement.setAttribute('y1', 0);
+                lineElement.setAttribute('x2', 0);
+                lineElement.setAttribute('y2', 0);
+            }
+        }
 
         document.querySelector('.player-x').classList.remove('active');
         document.querySelector('.player-o').classList.remove('active');
