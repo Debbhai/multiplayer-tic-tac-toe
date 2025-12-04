@@ -21,18 +21,22 @@ class UIManager {
         // Main menu buttons
         document.getElementById('playAIBtn').addEventListener('click', () => {
             this.openAIModal();
+            this.playSound('notification');
         });
 
         document.getElementById('createRoomBtn').addEventListener('click', () => {
             this.openRoomModal();
+            this.playSound('notification');
         });
 
         document.getElementById('joinRoomBtn').addEventListener('click', () => {
             this.openJoinModal();
+            this.playSound('notification');
         });
 
         document.getElementById('matchmakingBtn').addEventListener('click', () => {
             this.startMatchmaking();
+            this.playSound('notification');
         });
 
         // AI Modal
@@ -200,6 +204,7 @@ class UIManager {
                     document.getElementById('roomCode').textContent = response.roomCode;
                     document.getElementById('roomCodeDisplay').classList.remove('hidden');
                     this.addChatMessage('system', `Room ${response.roomCode} created. Waiting for opponent...`);
+                    this.playSound('notification');
                     
                     // Store room code
                     if (window.game) {
@@ -216,6 +221,7 @@ class UIManager {
         const code = document.getElementById('roomCode').textContent;
         navigator.clipboard.writeText(code).then(() => {
             this.showNotification('Room code copied to clipboard!');
+            this.playSound('notification');
         }).catch(err => {
             console.error('Failed to copy:', err);
             this.showNotification('Failed to copy code');
@@ -355,6 +361,11 @@ class UIManager {
 
         chatMessages.appendChild(messageEl);
         chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // Play chat sound for received messages
+        if (type === 'other') {
+            this.playSound('chat');
+        }
     }
 
     sendMessage() {
@@ -384,6 +395,7 @@ class UIManager {
             
             // Show own reaction
             this.addChatMessage('own', reaction);
+            this.playSound('notification');
         } else {
             this.showNotification('Not in a game room');
         }
@@ -475,16 +487,27 @@ class UIManager {
     // ===== SOUND =====
 
     initializeSoundToggle() {
-        const savedSound = localStorage.getItem('soundEnabled');
-        this.soundEnabled = savedSound !== 'false';
+        if (window.soundManager) {
+            this.soundEnabled = window.soundManager.isEnabled();
+        } else {
+            const savedSound = localStorage.getItem('soundEnabled');
+            this.soundEnabled = savedSound !== 'false';
+        }
         this.updateSoundButton();
     }
 
     toggleSound() {
-        this.soundEnabled = !this.soundEnabled;
-        localStorage.setItem('soundEnabled', this.soundEnabled);
-        this.updateSoundButton();
-        this.showNotification(this.soundEnabled ? 'Sound enabled' : 'Sound disabled');
+        if (window.soundManager) {
+            const enabled = window.soundManager.toggle();
+            this.soundEnabled = enabled;
+            this.updateSoundButton();
+            this.showNotification(enabled ? '🔊 Sound enabled' : '🔇 Sound disabled');
+            
+            // Play a test sound when enabling
+            if (enabled) {
+                window.soundManager.play('notification');
+            }
+        }
     }
 
     updateSoundButton() {
@@ -496,6 +519,7 @@ class UIManager {
                     <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
                 </svg>
             `;
+            btn.title = 'Sound On';
         } else {
             btn.innerHTML = `
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -504,12 +528,14 @@ class UIManager {
                     <line x1="17" y1="9" x2="23" y2="15"/>
                 </svg>
             `;
+            btn.title = 'Sound Off';
         }
     }
 
     playSound(soundName) {
-        if (!this.soundEnabled) return;
-        console.log(`Playing sound: ${soundName}`);
+        if (window.soundManager) {
+            window.soundManager.play(soundName);
+        }
     }
 
     // ===== NOTIFICATIONS =====

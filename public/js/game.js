@@ -44,6 +44,7 @@ socket.on('playerJoined', (data) => {
     if (window.ui) {
         window.ui.addChatMessage('system', `${data.username} joined the room. Starting game...`);
         window.ui.closeAllModals();
+        window.ui.playSound('notification');
     }
 });
 
@@ -70,6 +71,7 @@ socket.on('matchFound', (data) => {
     if (window.ui) {
         window.ui.showScreen('gameScreen');
         window.ui.addChatMessage('system', 'Match found! Game starting...');
+        window.ui.playSound('gameStart');
     }
     if (window.game) {
         window.game.handleGameStart(data);
@@ -112,6 +114,7 @@ socket.on('chatMessage', (data) => {
 socket.on('reaction', (data) => {
     if (window.ui && data.userId !== myPlayerId) {
         window.ui.addChatMessage('other', data.reaction);
+        window.ui.playSound('notification');
     }
 });
 
@@ -180,6 +183,15 @@ class TicTacToeGame {
         const cells = document.querySelectorAll('.cell');
         cells.forEach((cell, index) => {
             cell.addEventListener('click', () => this.handleCellClick(index));
+            
+            // Add hover sound
+            cell.addEventListener('mouseenter', () => {
+                if (this.gameActive && this.board[index] === null) {
+                    if (window.ui) {
+                        window.ui.playSound('hover');
+                    }
+                }
+            });
         });
     }
 
@@ -221,7 +233,9 @@ class TicTacToeGame {
             this.startTimer();
         }
 
-        window.ui.playSound('gameStart');
+        if (window.ui) {
+            window.ui.playSound('gameStart');
+        }
     }
 
     handleOpponentMove(data) {
@@ -248,7 +262,9 @@ class TicTacToeGame {
             this.resetTimer();
         }
         
-        window.ui.playSound('move');
+        if (window.ui) {
+            window.ui.playSound('move');
+        }
     }
 
     handleGameOver(data) {
@@ -263,11 +279,11 @@ class TicTacToeGame {
         if (data.result === 'draw') {
             result = 'draw';
             points = 1;
-            window.ui.playSound('draw');
+            if (window.ui) window.ui.playSound('draw');
         } else if (data.winner === mySymbol) {
             result = 'win';
             points = 10;
-            window.ui.playSound('win');
+            if (window.ui) window.ui.playSound('win');
             
             // Highlight winning cells
             if (data.winningPattern) {
@@ -277,7 +293,7 @@ class TicTacToeGame {
         } else {
             result = 'lose';
             points = 0;
-            window.ui.playSound('lose');
+            if (window.ui) window.ui.playSound('lose');
             
             // Highlight winning cells even when losing
             if (data.winningPattern) {
@@ -287,15 +303,19 @@ class TicTacToeGame {
         }
 
         // Record result
-        window.ui.recordGameResult(result);
+        if (window.ui) {
+            window.ui.recordGameResult(result);
+        }
 
         // Show result modal
         setTimeout(() => {
-            window.ui.showGameResult(result, points, {
-                gameTime: gameTime,
-                totalMoves: this.moveCount,
-                avgMoveTime: avgMoveTime
-            });
+            if (window.ui) {
+                window.ui.showGameResult(result, points, {
+                    gameTime: gameTime,
+                    totalMoves: this.moveCount,
+                    avgMoveTime: avgMoveTime
+                });
+            }
         }, 1500);
     }
 
@@ -309,6 +329,10 @@ class TicTacToeGame {
         
         if (this.timerEnabled) {
             this.startTimer();
+        }
+        
+        if (window.ui) {
+            window.ui.playSound('gameStart');
         }
     }
 
@@ -345,7 +369,9 @@ class TicTacToeGame {
             this.startTimer();
         }
 
-        window.ui.playSound('gameStart');
+        if (window.ui) {
+            window.ui.playSound('gameStart');
+        }
     }
 
     startOnlineGame(opponentName) {
@@ -361,7 +387,9 @@ class TicTacToeGame {
             this.startTimer();
         }
 
-        window.ui.playSound('gameStart');
+        if (window.ui) {
+            window.ui.playSound('gameStart');
+        }
     }
 
     createRoom(roomCode, settings) {
@@ -383,7 +411,9 @@ class TicTacToeGame {
         
         // For online games, check if it's your turn
         if (this.gameMode === 'online' && !this.isMyTurn) {
-            window.ui.showNotification("It's not your turn!");
+            if (window.ui) {
+                window.ui.showNotification("It's not your turn!");
+            }
             return;
         }
         
@@ -411,7 +441,9 @@ class TicTacToeGame {
         cell.textContent = player;
         cell.classList.add('filled', player.toLowerCase());
 
-        window.ui.playSound('move');
+        if (window.ui) {
+            window.ui.playSound('move');
+        }
 
         // For online games, emit move to server
         if (this.gameMode === 'online') {
@@ -425,7 +457,9 @@ class TicTacToeGame {
                     this.board[index] = null;
                     cell.textContent = '';
                     cell.classList.remove('filled', player.toLowerCase());
-                    window.ui.showNotification('Move failed: ' + response.error);
+                    if (window.ui) {
+                        window.ui.showNotification('Move failed: ' + response.error);
+                    }
                 }
             });
             
@@ -729,7 +763,7 @@ class TicTacToeGame {
 
             if (this.timeLeft <= 10) {
                 document.getElementById('timerProgress').classList.add('warning');
-                if (this.timeLeft <= 3) {
+                if (this.timeLeft <= 3 && window.ui) {
                     window.ui.playSound('tick');
                 }
             }
@@ -766,15 +800,19 @@ class TicTacToeGame {
 
     handleTimeout() {
         this.stopTimer();
-        window.ui.playSound('timeout');
+        if (window.ui) {
+            window.ui.playSound('timeout');
+        }
         
         if (this.gameMode === 'ai') {
             if (this.currentPlayer === this.playerSymbol) {
-                window.ui.addChatMessage('system', 'Time out! You lose.');
+                if (window.ui) {
+                    window.ui.addChatMessage('system', 'Time out! You lose.');
+                }
                 this.endGame(this.opponentSymbol);
             }
         } else if (this.gameMode === 'online') {
-            if (this.isMyTurn) {
+            if (this.isMyTurn && window.ui) {
                 window.ui.addChatMessage('system', 'Time out! You lose this turn.');
             }
         }
@@ -836,11 +874,11 @@ class TicTacToeGame {
         if (winner === 'draw') {
             result = 'draw';
             points = 1;
-            window.ui.playSound('draw');
+            if (window.ui) window.ui.playSound('draw');
         } else if (winner === this.playerSymbol) {
             result = 'win';
             points = this.calculatePoints();
-            window.ui.playSound('win');
+            if (window.ui) window.ui.playSound('win');
             
             // Draw winning line ONLY after game ends
             if (this.winningPattern) {
@@ -849,7 +887,7 @@ class TicTacToeGame {
         } else {
             result = 'lose';
             points = 0;
-            window.ui.playSound('lose');
+            if (window.ui) window.ui.playSound('lose');
             
             // Draw winning line ONLY after game ends
             if (this.winningPattern) {
@@ -857,14 +895,18 @@ class TicTacToeGame {
             }
         }
 
-        window.ui.recordGameResult(result);
+        if (window.ui) {
+            window.ui.recordGameResult(result);
+        }
 
         setTimeout(() => {
-            window.ui.showGameResult(result, points, {
-                gameTime: gameTime,
-                totalMoves: this.moveCount,
-                avgMoveTime: avgMoveTime
-            });
+            if (window.ui) {
+                window.ui.showGameResult(result, points, {
+                    gameTime: gameTime,
+                    totalMoves: this.moveCount,
+                    avgMoveTime: avgMoveTime
+                });
+            }
         }, 1500);
     }
 
