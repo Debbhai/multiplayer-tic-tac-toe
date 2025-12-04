@@ -4,7 +4,7 @@
  */
 
 // Socket.IO Connection
-const socket = io('http://localhost:3000'); // Change to your server URL in production
+const socket = io(window.location.origin); // Change to your server URL in production
 
 let currentRoomCode = null;
 let myPlayerId = null;
