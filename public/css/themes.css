@@ -1,0 +1,254 @@
+/* ===== Classic Theme ===== */
+.theme-classic {
+    --bg-primary: #f8f9fa;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #e9ecef;
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --color-primary: #0d6efd;
+    --color-primary-dark: #0a58ca;
+    --color-x: #dc3545;
+    --color-o: #0d6efd;
+    --border-color: #dee2e6;
+}
+
+.theme-classic .preview-cell {
+    background: #ffffff;
+    color: #212529;
+    border: 2px solid #dee2e6;
+}
+
+/* ===== Dark Mode Theme ===== */
+.theme-dark {
+    --bg-primary: #0f0f23;
+    --bg-secondary: #1a1a2e;
+    --bg-tertiary: #16213e;
+    --text-primary: #ffffff;
+    --text-secondary: #a8a8a8;
+    --color-primary: #00d4ff;
+    --color-primary-dark: #00a8cc;
+    --color-x: #ff006e;
+    --color-o: #00d4ff;
+    --border-color: #2a2a3e;
+}
+
+.theme-dark .preview-cell {
+    background: #16213e;
+    color: #00d4ff;
+}
+
+/* ===== Nature Theme ===== */
+.theme-nature {
+    --bg-primary: #e8f5e9;
+    --bg-secondary: #c8e6c9;
+    --bg-tertiary: #a5d6a7;
+    --text-primary: #1b5e20;
+    --text-secondary: #388e3c;
+    --color-primary: #4caf50;
+    --color-primary-dark: #388e3c;
+    --color-x: #2e7d32;
+    --color-o: #66bb6a;
+    --border-color: #81c784;
+}
+
+.theme-nature .preview-cell {
+    background: #c8e6c9;
+    color: #2e7d32;
+    border: 2px solid #81c784;
+}
+
+/* ===== Ocean Theme ===== */
+.theme-ocean {
+    --bg-primary: #e0f2f1;
+    --bg-secondary: #b2dfdb;
+    --bg-tertiary: #80cbc4;
+    --text-primary: #004d40;
+    --text-secondary: #00695c;
+    --color-primary: #009688;
+    --color-primary-dark: #00796b;
+    --color-x: #00897b;
+    --color-o: #26a69a;
+    --border-color: #4db6ac;
+}
+
+.theme-ocean .preview-cell {
+    background: linear-gradient(135deg, #b2dfdb, #80cbc4);
+    color: #00897b;
+}
+
+/* ===== Neon Theme ===== */
+.theme-neon {
+    --bg-primary: #0a0014;
+    --bg-secondary: #1a0033;
+    --bg-tertiary: #2d0052;
+    --text-primary: #ff00ff;
+    --text-secondary: #cc00ff;
+    --color-primary: #ff00ff;
+    --color-primary-dark: #cc00cc;
+    --color-x: #00ffff;
+    --color-o: #ff00ff;
+    --border-color: #4d0080;
+}
+
+.theme-neon .preview-cell {
+    background: #1a0033;
+    color: #00ffff;
+    box-shadow: 0 0 10px #ff00ff;
+}
+
+/* ===== Minimalist Theme ===== */
+.theme-minimalist {
+    --bg-primary: #fafafa;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f5f5f5;
+    --text-primary: #212121;
+    --text-secondary: #757575;
+    --color-primary: #424242;
+    --color-primary-dark: #212121;
+    --color-x: #212121;
+    --color-o: #757575;
+    --border-color: #e0e0e0;
+}
+
+.theme-minimalist .preview-cell {
+    background: #ffffff;
+    color: #212121;
+    border: 1px solid #e0e0e0;
+}
+
+/* ===== NEW: Sunset Theme ===== */
+.theme-sunset {
+    --bg-primary: #fff3e0;
+    --bg-secondary: #ffe0b2;
+    --bg-tertiary: #ffcc80;
+    --text-primary: #e65100;
+    --text-secondary: #f57c00;
+    --color-primary: #ff9800;
+    --color-primary-dark: #f57c00;
+    --color-x: #ff6f00;
+    --color-o: #ffb74d;
+    --border-color: #ffb74d;
+}
+
+.theme-sunset .preview-cell {
+    background: linear-gradient(135deg, #ffe0b2, #ffcc80);
+    color: #ff6f00;
+}
+
+/* ===== NEW: Cyberpunk Theme ===== */
+.theme-cyberpunk {
+    --bg-primary: #0d0221;
+    --bg-secondary: #160535;
+    --bg-tertiary: #240750;
+    --text-primary: #f72585;
+    --text-secondary: #b5179e;
+    --color-primary: #7209b7;
+    --color-primary-dark: #560bad;
+    --color-x: #f72585;
+    --color-o: #4cc9f0;
+    --border-color: #3a0ca3;
+}
+
+.theme-cyberpunk .preview-cell {
+    background: #160535;
+    color: #f72585;
+    box-shadow: 0 0 8px #7209b7;
+}
+
+/* ===== NEW: Retro Theme ===== */
+.theme-retro {
+    --bg-primary: #fef6e4;
+    --bg-secondary: #f3d2c1;
+    --bg-tertiary: #f582ae;
+    --text-primary: #001858;
+    --text-secondary: #172c66;
+    --color-primary: #8bd3dd;
+    --color-primary-dark: #6bb6c0;
+    --color-x: #f582ae;
+    --color-o: #8bd3dd;
+    --border-color: #ffa686;
+}
+
+.theme-retro .preview-cell {
+    background: #f3d2c1;
+    color: #f582ae;
+    border: 2px solid #ffa686;
+}
+
+/* ===== NEW: Pastel Theme ===== */
+.theme-pastel {
+    --bg-primary: #fef9f3;
+    --bg-secondary: #ffeef8;
+    --bg-tertiary: #e5c5e5;
+    --text-primary: #6b4c8a;
+    --text-secondary: #9b7bb5;
+    --color-primary: #c891d4;
+    --color-primary-dark: #b57bc5;
+    --color-x: #ffb5c5;
+    --color-o: #b5d4ff;
+    --border-color: #e5c5e5;
+}
+
+.theme-pastel .preview-cell {
+    background: #ffeef8;
+    color: #c891d4;
+    border: 2px solid #e5c5e5;
+}
+
+/* ===== NEW: Forest Theme ===== */
+.theme-forest {
+    --bg-primary: #f1f8f4;
+    --bg-secondary: #d4edda;
+    --bg-tertiary: #9ec5ab;
+    --text-primary: #1e4620;
+    --text-secondary: #2d5a2e;
+    --color-primary: #52734d;
+    --color-primary-dark: #3e5a38;
+    --color-x: #91c788;
+    --color-o: #52734d;
+    --border-color: #9ec5ab;
+}
+
+.theme-forest .preview-cell {
+    background: #d4edda;
+    color: #52734d;
+    border: 2px solid #9ec5ab;
+}
+
+/* ===== NEW: Candy Theme ===== */
+.theme-candy {
+    --bg-primary: #fff0f6;
+    --bg-secondary: #ffe4f3;
+    --bg-tertiary: #ffb3d9;
+    --text-primary: #c2185b;
+    --text-secondary: #d81b60;
+    --color-primary: #ec407a;
+    --color-primary-dark: #d81b60;
+    --color-x: #ff4081;
+    --color-o: #9c27b0;
+    --border-color: #f48fb1;
+}
+
+.theme-candy .preview-cell {
+    background: linear-gradient(135deg, #ffe4f3, #ffb3d9);
+    color: #ff4081;
+}
+
+/* ===== NEW: Midnight Theme ===== */
+.theme-midnight {
+    --bg-primary: #0c1222;
+    --bg-secondary: #1a2332;
+    --bg-tertiary: #2c3e50;
+    --text-primary: #ecf0f1;
+    --text-secondary: #bdc3c7;
+    --color-primary: #3498db;
+    --color-primary-dark: #2980b9;
+    --color-x: #e74c3c;
+    --color-o: #3498db;
+    --border-color: #34495e;
+}
+
+.theme-midnight .preview-cell {
+    background: #1a2332;
+    color: #3498db;
+}
