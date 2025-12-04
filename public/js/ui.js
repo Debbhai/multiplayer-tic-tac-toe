@@ -181,6 +181,13 @@ class UIManager {
         document.getElementById('roomModal').classList.add('hidden');
     }
 
+    closeAllModals() {
+        document.getElementById('aiModal').classList.add('hidden');
+        document.getElementById('roomModal').classList.add('hidden');
+        document.getElementById('joinModal').classList.add('hidden');
+        document.getElementById('resultModal').classList.add('hidden');
+    }
+
     createRoom() {
         const allowSpectators = document.getElementById('allowSpectators').checked;
         const enableTimer = document.getElementById('enableTimer').checked;
@@ -237,7 +244,6 @@ class UIManager {
         socket.emit('joinRoom', code, (response) => {
             if (response.success) {
                 this.closeJoinModal();
-                this.showScreen('gameScreen');
                 this.addChatMessage('system', `Joined room ${code}. Game starting...`);
                 
                 if (window.game) {
@@ -314,7 +320,7 @@ class UIManager {
             socket.emit('leaveRoom');
             
             if (window.game) {
-                window.game.endGame();
+                window.game.resetGame();
             }
             this.showScreen('mainMenu');
             this.addChatMessage('system', 'You left the game');
